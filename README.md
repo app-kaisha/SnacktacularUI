@@ -1,5 +1,7 @@
 Chapter 8 JG SwiftUI Course - Snacktacular App
 
+***Requires Firebase Auth, Firebase Storage and Firebase Firestore to be installed in App***
+
 <table>
   <tr>
     <td colspan="3" align="center"><h1>Snacktacular!</h1></td>
