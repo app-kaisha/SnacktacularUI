@@ -12,7 +12,7 @@ import FirebaseFirestore
 
 struct SpotDetailView: View {
     
-    @FirestoreQuery(collectionPath: "spots") var photos: [Photo]
+    @FirestoreQuery(collectionPath: "spots") var fsPhotos: [Photo]
     
     @State var spot: Spot
     
@@ -21,6 +21,16 @@ struct SpotDetailView: View {
     @State private var alertMessage = "Cannot add a Photo until you save the Spot."
     
     @Environment(\.dismiss) private var dismiss
+    
+    private var photos: [Photo] {
+        // if preview then show mock data
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            return [Photo.preview,Photo.preview,Photo.preview,Photo.preview,Photo.preview,Photo.preview]
+        }
+        // else show the firbase photos
+        return fsPhotos
+    }
+    
     var body: some View {
         VStack {
             Group {
@@ -78,7 +88,7 @@ struct SpotDetailView: View {
         .navigationBarBackButtonHidden()
         .task {
             // update firebase query
-            $photos.path = "spots/\(spot.id ?? "")/photos"
+            $fsPhotos.path = "spots/\(spot.id ?? "")/photos"
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -128,6 +138,6 @@ struct SpotDetailView: View {
 
 #Preview {
     NavigationStack {
-        SpotDetailView(spot: Spot(id: "1", name: "BC Market", address: "Boston MA"))
+        SpotDetailView(spot: Spot.preview)
     }
 }
