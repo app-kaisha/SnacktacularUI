@@ -7,8 +7,12 @@
 //
 
 import SwiftUI
+import Firebase
+import FirebaseFirestore
 
 struct SpotDetailView: View {
+    
+    @FirestoreQuery(collectionPath: "spots") var photos: [Photo]
     
     @State var spot: Spot
     
@@ -47,11 +51,35 @@ struct SpotDetailView: View {
             .bold()
             .buttonStyle(.borderedProminent)
             .tint(.snackColour)
+            
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(photos) { photo in
+                        let url = URL(string: photo.imageURLString)
+                        
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipped()
+                        } placeholder: {
+                            ProgressView()
+                            
+                        }
 
+                    }
+                }
+            }
+            .frame(height: 80)
             
             Spacer()
         }
         .navigationBarBackButtonHidden()
+        .task {
+            // update firebase query
+            $photos.path = "spots/\(spot.id ?? "")/photos"
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button("Cancel") {
@@ -100,6 +128,6 @@ struct SpotDetailView: View {
 
 #Preview {
     NavigationStack {
-        SpotDetailView(spot: Spot())
+        SpotDetailView(spot: Spot(id: "1", name: "BC Market", address: "Boston MA"))
     }
 }
