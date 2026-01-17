@@ -25,7 +25,7 @@ struct SnacktacularUIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
                 .onAppear {
                     Thread.sleep(forTimeInterval: 3)
                 }
