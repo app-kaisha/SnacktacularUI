@@ -21,6 +21,7 @@ struct LoginView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var buttonDisabled = true
+    @State private var presentSheet = false
     
     @FocusState private var focusField: Field?
     
@@ -79,6 +80,15 @@ struct LoginView: View {
         .alert(alertMessage, isPresented: $showingAlert) {
             Button("OK", role: .cancel) { }
         }
+        .onAppear {
+            if Auth.auth().currentUser != nil {
+                print("🪵 Log in successful!")
+                presentSheet = true
+            }
+        }
+        .fullScreenCover(isPresented: $presentSheet) {
+            ListView()
+        }
     }
     
     func enableButtons() {
@@ -95,7 +105,7 @@ struct LoginView: View {
                 showingAlert = true
             } else {
                 print("😎 Registration success!")
-                // TODO: Load ListView
+                presentSheet = true
             }
         }
     }
@@ -107,8 +117,8 @@ struct LoginView: View {
                 alertMessage = "LOGIN ERROR: \(error.localizedDescription)"
                 showingAlert = true
             } else {
-                print("🪵 Login success!")
-                // TODO: Load ListView
+                print("🪵 Log in successful!")
+                presentSheet = true
             }
         }
     }
