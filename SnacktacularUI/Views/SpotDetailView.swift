@@ -11,7 +11,6 @@ import SwiftUI
 struct SpotDetailView: View {
     
     @State var spot: Spot
-    @State var spotVM = SpotViewModel()
     
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -41,7 +40,7 @@ struct SpotDetailView: View {
             
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
-                    let success = spotVM.saveSpot(spot: spot)
+                    let success = SpotViewModel.saveSpot(spot: spot)
                     if success {
                         dismiss()
                     } else {
