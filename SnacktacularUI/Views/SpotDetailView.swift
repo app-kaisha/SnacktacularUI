@@ -87,8 +87,13 @@ struct SpotDetailView: View {
         }
         .navigationBarBackButtonHidden()
         .task {
+            
+            guard let id = spot.id else {
+                print("New record - has no id")
+                return
+            }
             // update firebase query
-            $fsPhotos.path = "spots/\(spot.id ?? "")/photos"
+            $fsPhotos.path = "spots/\(id)/photos"
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -114,6 +119,7 @@ struct SpotDetailView: View {
                     }
                     spot.id = id
                     print("spot.id \(id)")
+                    $fsPhotos.path = "spots/\(id)/photos"
                     photoSheetIsPresented.toggle()
                 }
             }
