@@ -66,8 +66,14 @@ struct SpotDetailView: View {
             
             Map(position: .constant(mapCameraPosition)) {
                 Marker(spot.name, coordinate: CLLocationCoordinate2D(latitude: spot.latitude, longitude: spot.longitude))
+                    .tint(.snackColour)
+                
+                UserAnnotation()
             }
-            .tint(.snackColour)
+            .mapControls {
+                MapUserLocationButton()
+            }
+            .mapStyle(.standard(pointsOfInterest: .excluding([.aquarium, .conventionCenter, .zoo]), showsTraffic: true))
             .frame(height: 250)
             
             Button {
