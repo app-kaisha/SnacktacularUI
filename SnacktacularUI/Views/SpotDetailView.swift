@@ -48,6 +48,8 @@ struct SpotDetailView: View {
             }
             .padding(.horizontal)
             
+            Text("Lat: \(spot.latitude) Lon: \(spot.longitude)")
+            
             Button {
                 if spot.id == nil {
                     showingAlert.toggle()

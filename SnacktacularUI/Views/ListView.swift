@@ -15,7 +15,10 @@ struct ListView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    @State private var locationManager = LocationManager()
     @State private var sheetIsPresented = false
+    @State private var spotDetailIsPresented = false
+    @State private var newSpot = Spot() // for passed back to here up binding value
     
     @FirestoreQuery(collectionPath: "spots") var spots: [Spot]
     
@@ -59,8 +62,24 @@ struct ListView: View {
                 }
             }
             .sheet(isPresented: $sheetIsPresented) {
+                PlaceLookupView(locationManager: locationManager, spot: $newSpot)
+                    .onDisappear {
+                        // if a place was selected, spot and a name so presetn the detail view
+                        if !newSpot.name.isEmpty {
+                            spotDetailIsPresented.toggle()
+                        } else {
+                            // reset the spot if dismissed/Cancelled
+                            newSpot = Spot()
+                        }
+                    }
+            }
+            .sheet(isPresented: $spotDetailIsPresented) {
                 NavigationStack {
-                    SpotDetailView(spot: Spot())
+                    SpotDetailView(spot: newSpot)
+                }
+                .onDisappear {
+                    // reset the spot if dismissed/Cancelled
+                    newSpot = Spot()
                 }
             }
         }
