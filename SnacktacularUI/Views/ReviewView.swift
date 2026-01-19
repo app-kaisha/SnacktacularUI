@@ -16,70 +16,71 @@ struct ReviewView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        VStack {
-            VStack(alignment: .leading) {
-                Text(spot.name)
-                    .font(.title)
-                    .bold()
-                    .lineLimit(1)
-                Text(spot.address)
-                    .padding(.bottom)
-            }
-            .padding(.horizontal)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Text("Click to Rate:")
-                .font(.title2).bold()
-            HStack {
-                StarSelectionView(rating: review.rating)
-                    .frame(maxWidth: .infinity)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(.gray.opacity(0.5), lineWidth: 2)
-                            .padding(.horizontal)
-                            
-                    }
-            }
-            .padding(.bottom)
-            
-            VStack(alignment: .leading) {
-                Text(review.title)
-                    .bold()
-                
-                TextField("title", text: $review.title)
-                    .textFieldStyle(.roundedBorder)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(.gray.opacity(0.5), lineWidth: 2)
-                    }
-                
-                Text("Review")
-                    .bold()
-                TextField("review", text: $review.body, axis: .vertical)
-                    .padding(.horizontal, 6)
-                    .frame(maxHeight: .infinity, alignment: .topLeading)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(.gray.opacity(0.5), lineWidth: 2)
-                    }
-            }
-            .padding(.horizontal)
-            .font(.title2)
-            
-
-            
-            Spacer()
-        }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
+        NavigationStack {
+            VStack {
+                VStack(alignment: .leading) {
+                    Text(spot.name)
+                        .font(.title)
+                        .bold()
+                        .lineLimit(1)
+                    Text(spot.address)
+                        .padding(.bottom)
                 }
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Text("Click to Rate:")
+                    .font(.title2).bold()
+                HStack {
+                    StarSelectionView(rating: review.rating)
+                        .frame(maxWidth: .infinity)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                                .padding(.horizontal)
+                            
+                        }
+                }
+                .padding(.bottom)
+                
+                VStack(alignment: .leading) {
+                    Text(review.title)
+                        .bold()
+                    
+                    TextField("title", text: $review.title)
+                        .textFieldStyle(.roundedBorder)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                        }
+                    
+                    Text("Review")
+                        .bold()
+                    TextField("review", text: $review.body, axis: .vertical)
+                        .padding(.horizontal, 6)
+                        .frame(maxHeight: .infinity, alignment: .topLeading)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                        }
+                }
+                .padding(.horizontal)
+                .font(.title2)
+
+                Spacer()
             }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                    dismiss()
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        dismiss()
+                    }
                 }
             }
         }
@@ -87,7 +88,5 @@ struct ReviewView: View {
 }
 
 #Preview {
-    NavigationStack {
-        ReviewView(spot: Spot(name: "Shake Shack", address: "49 Boyleston St., Chestnut Hill, MA 02467"), review: Review())
-    }
+    ReviewView(spot: Spot(name: "Shake Shack", address: "49 Boyleston St., Chestnut Hill, MA 02467"), review: Review())
 }

@@ -14,10 +14,12 @@ import MapKit
 struct SpotDetailView: View {
     
     @FirestoreQuery(collectionPath: "spots") var fsPhotos: [Photo]
+    @FirestoreQuery(collectionPath: "spots") var fsReviews: [Review]
     
     @State var spot: Spot
     
     @State private var photoSheetIsPresented = false
+    @State private var reviewSheetIsPresented = false
     @State private var showingAlert = false
     @State private var alertMessage = "Cannot add a Photo until you save the Spot."
     
@@ -30,6 +32,15 @@ struct SpotDetailView: View {
         }
         // else show the firbase photos
         return fsPhotos
+    }
+    
+    private var reviews: [Review] {
+        // if preview then show mock data
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            return [Review.preview, Review.preview, Review.preview]
+        }
+        // else show the firbase reviews
+        return fsReviews
     }
     
     private let mapDimensions = 750.0
@@ -75,6 +86,40 @@ struct SpotDetailView: View {
             }
             .mapStyle(.standard(pointsOfInterest: .excluding([.aquarium, .conventionCenter, .zoo]), showsTraffic: true))
             .frame(height: 250)
+            
+            // TODO: List of reviews
+            List {
+                Section {
+                    ForEach(reviews) { review in
+                        NavigationLink {
+                            ReviewView(spot: spot, review: review)
+                        } label: {
+                            Text(review.title)
+                        }
+
+                    }
+                } header: {
+                    HStack {
+                        Text("Avg. Rating")
+                            .font(.title2).bold()
+                        Text("4.5")
+                            .font(.title)
+                            .fontWeight(.black)
+                            .foregroundStyle(.snackColour)
+                        Spacer()
+                        Button("Rate It") {
+                            reviewSheetIsPresented.toggle()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .bold()
+                        .tint(.snackColour)
+                    }
+                }
+                .headerProminence(.increased)
+
+            }
+            .listStyle(.plain)
+            
             
             Button {
                 if spot.id == nil {
@@ -154,6 +199,9 @@ struct SpotDetailView: View {
         }
         .fullScreenCover(isPresented: $photoSheetIsPresented) {
             PhotoView(spot: spot)
+        }
+        .fullScreenCover(isPresented: $reviewSheetIsPresented) {
+            ReviewView(spot: spot, review: Review())
         }
     }
     
