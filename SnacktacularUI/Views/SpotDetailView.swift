@@ -26,6 +26,8 @@ struct SpotDetailView: View {
     @State private var reviewToggle = false
     @State private var photoToggle = false
     
+    @State private var showingAsSheet = false
+    
     @Environment(\.dismiss) private var dismiss
     
     private var photos: [Photo] {
@@ -64,9 +66,11 @@ struct SpotDetailView: View {
             Group {
                 TextField("name", text: $spot.name)
                     .font(.title)
+                    .disabled(spot.id != nil)
                     .autocorrectionDisabled()
                 TextField("address", text: $spot.address)
                     .font(.title2)
+                    .disabled(spot.id != nil)
                     .autocorrectionDisabled()
             }
             .textFieldStyle(.roundedBorder)
@@ -128,7 +132,7 @@ struct SpotDetailView: View {
                     }
                 }
                 .headerProminence(.increased)
-
+                
             }
             .listStyle(.plain)
             .frame(height: 240)
@@ -163,7 +167,7 @@ struct SpotDetailView: View {
                             ProgressView()
                             
                         }
-
+                        
                     }
                 }
             }
@@ -174,6 +178,13 @@ struct SpotDetailView: View {
         .padding(.top, 50)
         .padding(.bottom, 20)
         .navigationBarBackButtonHidden()
+        .onAppear {
+            if (spot.id == nil) {
+                showingAsSheet = true
+            } else {
+                showingAsSheet = false
+            }
+        }
         .task {
             
             guard let id = spot.id else {
@@ -185,16 +196,24 @@ struct SpotDetailView: View {
             $fsReviews.path = "spots/\(id)/reviews"
         }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button("Cancel") {
-                    dismiss()
+            if showingAsSheet && spot.id == nil {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
-            }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                    saveSpot()
-                    dismiss()
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        saveSpot()
+                        dismiss()
+                    }
+                }
+            } else {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    
                 }
             }
         }
@@ -207,17 +226,21 @@ struct SpotDetailView: View {
                         return
                     }
                     spot.id = id
-                    $fsPhotos.path = "spots/\(id)/photos"
-                    $fsReviews.path = "spots/\(id)/reviews"
                     
                     if reviewToggle == true {
                         reviewToggle.toggle()
+                        $fsReviews.path = "spots/\(id)/reviews"
                         reviewSheetIsPresented.toggle()
+                        showingAsSheet = false
                     }
                     if photoToggle == true {
                         photoToggle.toggle()
+                        $fsPhotos.path = "spots/\(id)/photos"
                         photoSheetIsPresented.toggle()
+                        showingAsSheet = false
                     }
+                    
+                    
                     
                 }
             }

@@ -74,7 +74,10 @@ struct ListView: View {
                     }
             }
             .sheet(isPresented: $spotDetailIsPresented) {
-                SpotDetailView(spot: newSpot)
+                NavigationStack{
+                    SpotDetailView(spot: newSpot)
+                        .padding(.top, 50)
+                }
                     .onDisappear {
                         // reset the spot if dismissed/Cancelled
                         newSpot = Spot()
