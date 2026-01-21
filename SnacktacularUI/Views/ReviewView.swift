@@ -32,7 +32,7 @@ struct ReviewView: View {
                 Text("Click to Rate:")
                     .font(.title2).bold()
                 HStack {
-                    StarSelectionView(rating: review.rating)
+                    StarSelectionView(rating: $review.rating)
                         .frame(maxWidth: .infinity)
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
@@ -44,11 +44,12 @@ struct ReviewView: View {
                 .padding(.bottom)
                 
                 VStack(alignment: .leading) {
-                    Text(review.title)
+                    Text("Title")
                         .bold()
                     
                     TextField("title", text: $review.title)
                         .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
                                 .stroke(.gray.opacity(0.5), lineWidth: 2)
@@ -58,6 +59,7 @@ struct ReviewView: View {
                         .bold()
                     TextField("review", text: $review.body, axis: .vertical)
                         .padding(.horizontal, 6)
+                        .autocorrectionDisabled()
                         .frame(maxHeight: .infinity, alignment: .topLeading)
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
@@ -79,11 +81,26 @@ struct ReviewView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        dismiss()
+                        Task {
+                            saveReview()
+                            dismiss()
+                        }
                     }
                 }
             }
         }
+    }
+    
+    func saveReview() {
+        Task {
+            guard let id = await ReviewViewModel.saveReview(spot: spot, review: review) else {
+                print("😡 ERROR: Saving spot from Save button.")
+                return
+            }
+            print("review.id \(id)")
+            print("😎 Nice Review save!")
+        }
+        
     }
 }
 

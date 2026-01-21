@@ -74,13 +74,11 @@ struct ListView: View {
                     }
             }
             .sheet(isPresented: $spotDetailIsPresented) {
-                NavigationStack {
-                    SpotDetailView(spot: newSpot)
-                }
-                .onDisappear {
-                    // reset the spot if dismissed/Cancelled
-                    newSpot = Spot()
-                }
+                SpotDetailView(spot: newSpot)
+                    .onDisappear {
+                        // reset the spot if dismissed/Cancelled
+                        newSpot = Spot()
+                    }
             }
         }
     }

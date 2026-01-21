@@ -21,7 +21,10 @@ struct SpotDetailView: View {
     @State private var photoSheetIsPresented = false
     @State private var reviewSheetIsPresented = false
     @State private var showingAlert = false
-    @State private var alertMessage = "Cannot add a Photo until you save the Spot."
+    @State private var alertMessage = ""
+    
+    @State private var reviewToggle = false
+    @State private var photoToggle = false
     
     @Environment(\.dismiss) private var dismiss
     
@@ -87,7 +90,6 @@ struct SpotDetailView: View {
             .mapStyle(.standard(pointsOfInterest: .excluding([.aquarium, .conventionCenter, .zoo]), showsTraffic: true))
             .frame(height: 250)
             
-            // TODO: List of reviews
             List {
                 Section {
                     ForEach(reviews) { review in
@@ -96,7 +98,11 @@ struct SpotDetailView: View {
                         } label: {
                             Text(review.title)
                         }
-
+                        .swipeActions {
+                            Button("Delete", role: .destructive) {
+                                ReviewViewModel.deleteReview(spot: spot, review: review)
+                            }
+                        }
                     }
                 } header: {
                     HStack {
@@ -108,7 +114,13 @@ struct SpotDetailView: View {
                             .foregroundStyle(.snackColour)
                         Spacer()
                         Button("Rate It") {
-                            reviewSheetIsPresented.toggle()
+                            if spot.id == nil {
+                                reviewToggle.toggle()
+                                alertMessage = "Cannot add a Review until you save the Spot."
+                                showingAlert.toggle()
+                            } else {
+                                reviewSheetIsPresented.toggle()
+                            }
                         }
                         .buttonStyle(.borderedProminent)
                         .bold()
@@ -119,10 +131,12 @@ struct SpotDetailView: View {
 
             }
             .listStyle(.plain)
-            
+            .frame(height: 240)
             
             Button {
                 if spot.id == nil {
+                    photoToggle.toggle()
+                    alertMessage = "Cannot add a Photo until you save the Spot."
                     showingAlert.toggle()
                 } else {
                     photoSheetIsPresented.toggle()
@@ -139,7 +153,6 @@ struct SpotDetailView: View {
                 HStack {
                     ForEach(photos) { photo in
                         let url = URL(string: photo.imageURLString)
-                        
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
@@ -158,6 +171,8 @@ struct SpotDetailView: View {
             
             Spacer()
         }
+        .padding(.top, 50)
+        .padding(.bottom, 20)
         .navigationBarBackButtonHidden()
         .task {
             
@@ -167,6 +182,7 @@ struct SpotDetailView: View {
             }
             // update firebase query
             $fsPhotos.path = "spots/\(id)/photos"
+            $fsReviews.path = "spots/\(id)/reviews"
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -191,9 +207,18 @@ struct SpotDetailView: View {
                         return
                     }
                     spot.id = id
-                    print("spot.id \(id)")
                     $fsPhotos.path = "spots/\(id)/photos"
-                    photoSheetIsPresented.toggle()
+                    $fsReviews.path = "spots/\(id)/reviews"
+                    
+                    if reviewToggle == true {
+                        reviewToggle.toggle()
+                        reviewSheetIsPresented.toggle()
+                    }
+                    if photoToggle == true {
+                        photoToggle.toggle()
+                        photoSheetIsPresented.toggle()
+                    }
+                    
                 }
             }
         }
@@ -208,7 +233,7 @@ struct SpotDetailView: View {
     func saveSpot() {
         Task {
             guard let id = await SpotViewModel.saveSpot(spot: spot) else {
-                print("😡 ERROR: Saving spot from Savve button.")
+                print("😡 ERROR: Saving spot from Save button.")
                 return
             }
             print("spot.id \(id)")
