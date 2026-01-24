@@ -61,6 +61,17 @@ struct SpotDetailView: View {
         )
     }
     
+    private var avgRating: String {
+        
+        guard reviews.count != 0 else {
+            return "-.-"
+        }
+        
+        let averageValue = Double(reviews.reduce(0) { $0 + $1.rating }) / Double(reviews.count)
+        
+        return String(format: "%.1f", averageValue)
+    }
+    
     var body: some View {
         VStack {
             Group {
@@ -100,7 +111,7 @@ struct SpotDetailView: View {
                         NavigationLink {
                             ReviewView(spot: spot, review: review)
                         } label: {
-                            Text(review.title)
+                            SpotReviewRowView(review: review)
                         }
                         .swipeActions {
                             Button("Delete", role: .destructive) {
@@ -112,7 +123,7 @@ struct SpotDetailView: View {
                     HStack {
                         Text("Avg. Rating")
                             .font(.title2).bold()
-                        Text("4.5")
+                        Text(avgRating)
                             .font(.title)
                             .fontWeight(.black)
                             .foregroundStyle(.snackColour)

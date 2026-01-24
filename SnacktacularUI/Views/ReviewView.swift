@@ -7,11 +7,15 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct ReviewView: View {
     
     @State var spot: Spot
     @State var review: Review
+    
+    @State private var postedByThisUser = false
+    @State private var rateOrReviewString = "Click to Rate:"
     
     @Environment(\.dismiss) private var dismiss
     
@@ -29,16 +33,20 @@ struct ReviewView: View {
                 .padding(.horizontal)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("Click to Rate:")
-                    .font(.title2).bold()
+                Text(rateOrReviewString)
+                    .font(postedByThisUser ? .title2 : .subheadline)
+                    .bold(postedByThisUser)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .padding(.horizontal)
                 HStack {
                     StarSelectionView(rating: $review.rating)
+                        .disabled(!postedByThisUser)
                         .frame(maxWidth: .infinity)
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
-                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                                .stroke(.gray.opacity(0.5), lineWidth: postedByThisUser ? 2 : 0)
                                 .padding(.horizontal)
-                            
                         }
                 }
                 .padding(.bottom)
@@ -48,11 +56,11 @@ struct ReviewView: View {
                         .bold()
                     
                     TextField("title", text: $review.title)
-                        .textFieldStyle(.roundedBorder)
+                        .padding(.horizontal, 6)
                         .autocorrectionDisabled()
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
-                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                                .stroke(.gray.opacity(0.5), lineWidth: postedByThisUser ? 2 : 0.3)
                         }
                     
                     Text("Review")
@@ -63,27 +71,38 @@ struct ReviewView: View {
                         .frame(maxHeight: .infinity, alignment: .topLeading)
                         .overlay {
                             RoundedRectangle(cornerRadius: 5)
-                                .stroke(.gray.opacity(0.5), lineWidth: 2)
+                                .stroke(.gray.opacity(0.5), lineWidth: postedByThisUser ? 2 : 0.3)
                         }
                 }
+                .disabled(!postedByThisUser)
                 .padding(.horizontal)
                 .font(.title2)
 
                 Spacer()
             }
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+            .navigationBarBackButtonHidden(postedByThisUser)
+            .onAppear {
+                if review.reviewer == Auth.auth().currentUser?.email {
+                    postedByThisUser = true
+                } else {
+                    let reviewPostedOn = review.postedOn.formatted(date: .abbreviated, time: .omitted)
+                    rateOrReviewString = "by: \(review.reviewer) on: \(reviewPostedOn)"
                 }
-                
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save") {
-                        Task {
-                            saveReview()
+            }
+            .toolbar {
+                if postedByThisUser {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
                             dismiss()
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save") {
+                            Task {
+                                saveReview()
+                                dismiss()
+                            }
                         }
                     }
                 }
