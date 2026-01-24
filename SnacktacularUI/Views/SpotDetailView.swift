@@ -113,11 +113,11 @@ struct SpotDetailView: View {
                         } label: {
                             SpotReviewRowView(review: review)
                         }
-                        .swipeActions {
-                            Button("Delete", role: .destructive) {
-                                ReviewViewModel.deleteReview(spot: spot, review: review)
-                            }
-                        }
+//                        .swipeActions {
+//                            Button("Delete", role: .destructive) {
+//                                ReviewViewModel.deleteReview(spot: spot, review: review)
+//                            }
+//                        }
                     }
                 } header: {
                     HStack {

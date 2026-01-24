@@ -53,22 +53,22 @@ class ReviewViewModel {
     }
     
     
-    static func deleteReview(spot: Spot, review: Review) {
+    static func deleteReview(spot: Spot, review: Review)  async -> Bool {
         let db = Firestore.firestore()
         
         guard let spotID = spot.id, let reviewID = review.id else {
-            print("No spot.id")
-            return
+            print("😡 ERROR: spot.id = \(spot.id ?? "nil"), review.id = \(review.id ?? "nil").")
+            return false
         }
         
         let collectionString = "spots/\(spotID)/reviews"
         
-        Task {
-            do {
-                try await db.collection(collectionString).document(reviewID).delete()
-            } catch {
-                print("😡 ERROR: Could not delete the document \(reviewID). \(error.localizedDescription)")
-            }
+        do {
+            try await db.collection(collectionString).document(reviewID).delete()
+            return true
+        } catch {
+            print("😡 ERROR: Could not delete the document \(reviewID). \(error.localizedDescription)")
+            return false
         }
     }
 }
