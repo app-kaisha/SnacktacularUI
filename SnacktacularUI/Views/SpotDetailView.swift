@@ -13,6 +13,10 @@ import MapKit
 
 struct SpotDetailView: View {
     
+    enum ButtonPressed {
+        case review, photo
+    }
+    
     @FirestoreQuery(collectionPath: "spots") var fsPhotos: [Photo]
     @FirestoreQuery(collectionPath: "spots") var fsReviews: [Review]
     
@@ -27,6 +31,7 @@ struct SpotDetailView: View {
     @State private var photoToggle = false
     
     @State private var showingAsSheet = false
+    @State private var buttonPressed = ButtonPressed.review
     
     @Environment(\.dismiss) private var dismiss
     
@@ -105,6 +110,56 @@ struct SpotDetailView: View {
             .mapStyle(.standard(pointsOfInterest: .excluding([.aquarium, .conventionCenter, .zoo]), showsTraffic: true))
             .frame(height: 250)
             
+            HStack {
+                Group {
+                    Text("Avg Rating")
+                        .font(.title2).bold()
+                    Text(avgRating)
+                        .font(.title)
+                        .fontWeight(.black)
+                        .foregroundStyle(.snackColour)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                Spacer()
+                
+                Group {
+                    Button {
+                        buttonPressed = .photo
+                        if spot.id == nil {
+                            photoToggle.toggle()
+                            alertMessage = "Cannot add a Photo until you save the Spot."
+                            showingAlert.toggle()
+                        } else {
+                            photoSheetIsPresented.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "camera.fill")
+                        Text("Photo")
+                    }
+                    
+                    Button {
+                        buttonPressed = .review
+                        if spot.id == nil {
+                            reviewToggle.toggle()
+                            alertMessage = "Cannot add a Review until you save the Spot."
+                            showingAlert.toggle()
+                        } else {
+                            reviewSheetIsPresented.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "star.fill")
+                        Text("Rate")
+                    }
+                }
+                .font(.headline)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .buttonStyle(.borderedProminent)
+                .tint(.snackColour)
+            }
+            .padding(.horizontal)
+            
             List {
                 Section {
                     ForEach(reviews) { review in
@@ -113,56 +168,12 @@ struct SpotDetailView: View {
                         } label: {
                             SpotReviewRowView(review: review)
                         }
-//                        .swipeActions {
-//                            Button("Delete", role: .destructive) {
-//                                ReviewViewModel.deleteReview(spot: spot, review: review)
-//                            }
-//                        }
-                    }
-                } header: {
-                    HStack {
-                        Text("Avg. Rating")
-                            .font(.title2).bold()
-                        Text(avgRating)
-                            .font(.title)
-                            .fontWeight(.black)
-                            .foregroundStyle(.snackColour)
-                        Spacer()
-                        Button("Rate It") {
-                            if spot.id == nil {
-                                reviewToggle.toggle()
-                                alertMessage = "Cannot add a Review until you save the Spot."
-                                showingAlert.toggle()
-                            } else {
-                                reviewSheetIsPresented.toggle()
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .bold()
-                        .tint(.snackColour)
                     }
                 }
-                .headerProminence(.increased)
                 
             }
             .listStyle(.plain)
-            .frame(height: 240)
-            
-            Button {
-                if spot.id == nil {
-                    photoToggle.toggle()
-                    alertMessage = "Cannot add a Photo until you save the Spot."
-                    showingAlert.toggle()
-                } else {
-                    photoSheetIsPresented.toggle()
-                }
-            } label: {
-                Image(systemName: "camera.fill")
-                Text("Photo")
-            }
-            .bold()
-            .buttonStyle(.borderedProminent)
-            .tint(.snackColour)
+            .frame(height: 210)
             
             ScrollView(.horizontal) {
                 HStack {
@@ -183,11 +194,11 @@ struct SpotDetailView: View {
                 }
             }
             .frame(height: 80)
-            
+            .padding(.bottom, 20)
+            .padding(.leading, 10)
             Spacer()
         }
         .padding(.top, 50)
-        .padding(.bottom, 20)
         .navigationBarBackButtonHidden()
         .onAppear {
             if (spot.id == nil) {
@@ -238,20 +249,18 @@ struct SpotDetailView: View {
                     }
                     spot.id = id
                     
-                    if reviewToggle == true {
+                    switch buttonPressed {
+                    case .review:
                         reviewToggle.toggle()
                         $fsReviews.path = "spots/\(id)/reviews"
                         reviewSheetIsPresented.toggle()
                         showingAsSheet = false
-                    }
-                    if photoToggle == true {
+                    case .photo:
                         photoToggle.toggle()
                         $fsPhotos.path = "spots/\(id)/photos"
                         photoSheetIsPresented.toggle()
                         showingAsSheet = false
                     }
-                    
-                    
                     
                 }
             }
