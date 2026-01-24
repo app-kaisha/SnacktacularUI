@@ -110,6 +110,8 @@ struct SpotDetailView: View {
             .mapStyle(.standard(pointsOfInterest: .excluding([.aquarium, .conventionCenter, .zoo]), showsTraffic: true))
             .frame(height: 250)
             
+            SpotDetailPhotoScrollView(photos: photos, spot: spot)
+            
             HStack {
                 Group {
                     Text("Avg Rating")
@@ -175,28 +177,6 @@ struct SpotDetailView: View {
             .listStyle(.plain)
             .frame(height: 210)
             
-            ScrollView(.horizontal) {
-                HStack {
-                    ForEach(photos) { photo in
-                        let url = URL(string: photo.imageURLString)
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 80, height: 80)
-                                .clipped()
-                        } placeholder: {
-                            ProgressView()
-                            
-                        }
-                        
-                    }
-                }
-            }
-            .frame(height: 80)
-            .padding(.bottom, 20)
-            .padding(.leading, 10)
-            Spacer()
         }
         .padding(.top, 50)
         .navigationBarBackButtonHidden()
